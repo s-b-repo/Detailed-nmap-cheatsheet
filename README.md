@@ -122,9 +122,6 @@ pattern combining fragmentation, trusted source port, and decoys:
 sudo nmap -Pn -f --mtu 16 --source-port 53 -D RND:5 10.20.30.40
 ```
 
-This pattern is included as an operational note and should only be used within an authorized engagement.
-
-
 
 ## Nmap Cheat Sheet — Operational Notes
 
@@ -143,6 +140,47 @@ sudo nmap -sC -sV -oN portscan -v 10.20.30.40
 * `-v` increases verbosity
 
 Running as root (via `sudo`) enables SYN scans and other low-level techniques that are restricted to privileged users.
+Unique Methods — Port Scanning Techniques (Drop‑in)
+
+This drop‑in segment presents specialized and less common port/protocol scanning techniques suitable for insertion into operational playbooks. Each entry is a concise technical summary describing intent, expected behavior, limitations, and operational notes. Use only within authorized engagements or controlled laboratory environments.
+
+## -sS — SYN scan. 
+
+Sends SYN and interprets replies without completing the TCP three‑way handshake. Requires raw socket/privileged operation. Stealthier than a full connect scan in that it does not complete sessions; detectable by modern detection systems.
+
+## -sT — TCP connect scan. 
+Performs a full TCP connection (three‑way handshake). Requires no special privileges but generates full connection logs on the target and is therefore noisier.
+
+## -sU — UDP scan. 
+
+Probes UDP services (common examples: DNS 53, SNMP 161/162, DHCP 67/68). Possible state interpretations: open (service reply), closed (ICMP port unreachable), filtered (ICMP messages indicating filtering), open|filtered (no response). Use -sV to send protocol probes when open|filtered states appear; note that -sV increases scan duration substantially.
+
+## -sY — SCTP INIT scan. 
+Probes SCTP endpoints using INIT semantics. Behavior differs from TCP; in some deployments INIT failures pass without leaving host logs.
+
+## -sN, -sF, -sX — Null / FIN / Xmas scans. 
+Vary TCP flags (no flags, FIN only, FIN/PSH/URG respectively). Rely on RFC‑compliant stacks returning RST for closed ports and silence for open|filtered ports. Results are unreliable on many platforms and middleboxes (notably Windows and certain vendor stacks).
+
+## -sM — Maimon scan. Sends FIN+ACK (Maimon pattern). 
+Historically effective against BSD variants; many modern TCP/IP stacks treat this pattern as closed for most ports.
+
+## -sA, -sW — ACK and Window scans.
+Primarily used for firewall and ACL mapping rather than definitive service discovery. -sW attempts to distinguish open vs closed by inspecting RST window values where implementations differ; this method is heuristic and platform dependent.
+
+## -sI — Idle (zombie) scan.
+ Leverages a third‑party "zombie" host with predictable IPID sequencing to infer port states on the target while obscuring the scanner's origin. Requires a reliable zombie candidate (commonly discovered via ipidseq‑style checks) and is sensitive to NAT, asymmetric routing, and intervening middleboxes.
+
+## --badsum — Bad checksum probe. 
+Transmits packets with invalid checksums. Endhosts typically discard such packets, but some middleboxes will respond or exhibit behavior that exposes firewall semantics; used for detection of middlebox filtering, not for service enumeration.
+
+## -sZ — SCTP COOKIE‑ECHO scan ("weird" SCTP scan).
+Sends COOKIE‑ECHO fragments and interprets ABORT responses vs silent drops. May pass through some middleboxes that block other probe types. Limitation: often cannot reliably distinguish open vs filtered.
+
+## -sO — IP protocol scan.
+Scans IP protocol numbers (ICMP=1, TCP=6, UDP=17, etc.) rather than TCP/UDP ports. Infers support from ICMP unreachable messages and other responses; silence is treated as open|filtered.
+
+## -b <server> — FTP bounce (bounce scan).
+Attempts to instruct an FTP server to proxy connections to a third‑party host and port. Syntax: [<user>:<password>@]<server>[:<port>]. Most modern FTP servers disable proxy behavior; practical utility is limited.
 
 ### Scan All TCP Ports
 
