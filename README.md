@@ -4,7 +4,7 @@
 
 **Operational Unit:** Red Cell — Technical Reconnaissance Division
 
-**Author/Source:** Compiled from field notes and operational guidance; includes excerpts from "My Nmap Cheat Sheet" (Posted Aug 7, 2023, by Dan Fedele).
+**Author/Source:** Compiled from field notes and operational guidance; includes excerpts from "My Nmap Cheat Sheet" (Posted Aug 7, 2023, by Dan Fedele) & hacktricks & me suicidal_teddy.
 
 
 
